@@ -1,6 +1,13 @@
 # Pico ePaper
 
 ## Build Instructions
+
+Clone the repo
+```sh
+git clone https://github.com/CobbCoding1/pico-epaper
+cd pico-epaper
+```
+
 ## Windows
 
 Comprehensive guide: https://www.waveshare.com/wiki/Pico-Get-Start-Windows
