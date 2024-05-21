@@ -15,7 +15,7 @@ Comprehensive guide: https://www.waveshare.com/wiki/Pico-Get-Start-Windows
 ### Install dependendencies
 [Arm GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads)
 [CMake](https://cmake.org/download/)
-[VSCode 2022](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022)
+[Visual Studio 2022](https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022)
 [Python 3.10](https://www.python.org/downloads/windows/)
 [Git](https://git-scm.com/download/win)
 
@@ -29,7 +29,7 @@ git clone -b master https://github.com/raspberrypi/pico-examples.git
 ```
 
 ### Set up the environment
-From VSCode, press Tools -> Command Line -> Developer Powershell
+From Visual Studio, press Tools -> Command Line -> Developer Powershell
 Get the address to the pico-sdk you installed, and type this command
 ```sh
 setx PICO_SDK_PATH <path_to_sdk>
