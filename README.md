@@ -19,6 +19,9 @@ Comprehensive guide: https://www.waveshare.com/wiki/Pico-Get-Start-Windows
 [Python 3.10](https://www.python.org/downloads/windows/)
 [Git](https://git-scm.com/download/win)
 
+When installing Visual Studio, make sure to install the build tools like the image provided here:
+![Toolchain](https://www.waveshare.com/w/upload/c/c7/Visual_Studio_2022.png)
+
 ### Install pico-sdk
 ```sh
 git clone -b master https://github.com/raspberrypi/pico-sdk.git
