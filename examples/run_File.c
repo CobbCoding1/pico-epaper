@@ -308,11 +308,14 @@ void file_cat(void)
     parameter: 
         none
 */
-void sdScanDir(void)
+void sdScanDir(int horizontal)
 {   
     run_mount();
 
-    ls2file("0:/pic", fileList);
+    if(horizontal)
+	    ls2file("0:/horizontal", fileList);
+    else
+	    ls2file("0:/vertical", fileList);
     printf("ls %s\r\n", fileList);
     run_cat(fileList);
 
@@ -427,7 +430,7 @@ static int getPathIndex(void)
     parameter: 
         none
 */
-void setFilePath(int horizontal)
+void setFilePath(void)
 {
     int index = 1;
 

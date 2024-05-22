@@ -14,10 +14,10 @@ void run_unmount(void);
 
 void file_cat(void);
 
-void sdScanDir(void);
+void sdScanDir(int horizontal);
 
 char isFileExist(const char *path);
-void setFilePath(int horizontal);
+void setFilePath(void);
 
 void updatePathIndex(void);
 void file_sort();

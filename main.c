@@ -9,7 +9,7 @@
 
 extern const char *fileList;
 extern char pathName[];
-extern int horizontal = 0;
+int horizontal = 0;
 
 #define enChargingRtc 0
 
@@ -46,7 +46,7 @@ void chargeState_callback()
 void run_display(Time_data Time, Time_data alarmTime, char hasCard)
 {
     if(hasCard) {
-        setFilePath(horizontal);
+        setFilePath();
         EPD_7in3f_display_BMP(pathName, measureVBAT());   // display bmp
     }
     else {
@@ -94,12 +94,12 @@ int main(void)
         isCard = 1;
         if(Mode == 0)
         {
-            sdScanDir();
+            sdScanDir(horizontal);
             file_sort();
         }
         if(Mode == 1)
         {
-            sdScanDir();
+            sdScanDir(horizontal);
         }
         if(Mode == 2)
         {
@@ -130,6 +130,7 @@ int main(void)
             if(!DEV_Digital_Read(BAT_STATE)) {  // KEY pressed
                 printf("key interrupt\r\n");
 		horizontal = !horizontal;
+		sdScanDir(horizontal);
                 run_display(Time, alarmTime, isCard);
             }
             DEV_Delay_ms(200);
