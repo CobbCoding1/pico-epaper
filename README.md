@@ -78,3 +78,11 @@ make -j4
 sudo make install
 ```
 
+Now, build the program. Naviate to the project directory, and execute the following commands.
+```
+mkdir build
+cd build
+cmake ..
+make -j4
+```
+

@@ -33,3 +33,4 @@ pico_enable_stdio_uart(epd 0)
 pico_add_extra_outputs(epd)
 
 target_link_libraries(epd examples ePaper GUI led Fonts Config RTC FatFs_SPI)
+

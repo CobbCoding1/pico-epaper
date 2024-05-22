@@ -427,10 +427,11 @@ static int getPathIndex(void)
     parameter: 
         none
 */
-void setFilePath(void)
+void setFilePath(int horizontal)
 {
     int index = 1;
 
+    // TODO: update it to randomly choose an index, rather than going in order
     if(isFileExist("index.txt")) {
         printf("index.txt is exist\r\n");
         index = getPathIndex();
