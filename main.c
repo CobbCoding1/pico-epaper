@@ -127,10 +127,15 @@ int main(void)
             }
             #endif
 
-            if(!DEV_Digital_Read(BAT_STATE)) {  // KEY pressed
+            if(!DEV_Digital_Read(KEY_0)) {  // KEY pressed
                 printf("key interrupt\r\n");
 		horizontal = !horizontal;
 		sdScanDir(horizontal);
+                run_display(Time, alarmTime, isCard);
+            }
+
+            if(!DEV_Digital_Read(BAT_STATE)) {  // KEY pressed
+                printf("key interrupt\r\n");
                 run_display(Time, alarmTime, isCard);
             }
             DEV_Delay_ms(200);

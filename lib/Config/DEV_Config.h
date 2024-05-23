@@ -94,6 +94,9 @@
 #define SD_MOSI_PIN     3
 #define SD_MISO_PIN     4
 
+#define KEY_0 		2
+#define KEY_1 		3
+
 #define VBUS            24
 #define Power_Mode      23
 #define VBAT            29
