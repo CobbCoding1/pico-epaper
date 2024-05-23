@@ -127,7 +127,7 @@ int main(void)
             }
             #endif
 
-            if(!DEV_Digital_Read(KEY_0)) {  // KEY pressed
+            if(!DEV_Digital_Read(KEY_1)) {  // KEY pressed
                 printf("key interrupt\r\n");
 		horizontal = !horizontal;
 		sdScanDir(horizontal);
