@@ -170,7 +170,7 @@ void ls(const char *dir) {
         dir: Directory path
         path: File path
 */
-void ls2file(const char *dir, const char *path) {
+void ls2file(const char *dir, const char *path, int horizontal) {
     char cwdbuf[FF_LFN_BUF] = {0};
     FRESULT fr; /* Return value */
     char const *p_dir;
@@ -220,7 +220,10 @@ void ls2file(const char *dir, const char *path) {
          attributes string. */
         if(fno.fname) {
             // f_printf(&fil, "%d %s\r\n", filNum, fno.fname);
-            f_printf(&fil, "pic/%s\r\n", fno.fname);
+	    if(horizontal)
+	    	f_printf(&fil, "horizontal/%s\r\n", fno.fname);
+	    else
+            	f_printf(&fil, "vertical/%s\r\n", fno.fname);
             filNum++;
         }
         fr = f_findnext(&dj, &fno); /* Search for next item */
@@ -313,9 +316,9 @@ void sdScanDir(int horizontal)
     run_mount();
 
     if(horizontal)
-	    ls2file("0:/horizontal", fileList);
+	    ls2file("0:/horizontal", fileList, horizontal);
     else
-	    ls2file("0:/vertical", fileList);
+	    ls2file("0:/vertical", fileList, horizontal);
     printf("ls %s\r\n", fileList);
     run_cat(fileList);
 

@@ -11,14 +11,14 @@ extern const char *fileList;
 extern char pathName[];
 int horizontal = 0;
 
-#define enChargingRtc 0
+#define enChargingRtc 1
 
 /*
 Mode 0: Automatically get pic folder names and sort them
 Mode 1: Automatically get pic folder names but not sorted
 Mode 2: pic folder name is not automatically obtained, users need to create fileList.txt file and write the picture name in TF card by themselves
 */
-#define Mode 2
+#define Mode 1
 
 
 float measureVBAT(void)
@@ -118,6 +118,7 @@ int main(void)
     else {  // charge state
         chargeState_callback();
         while(DEV_Digital_Read(VBUS)) {
+	    int count = 0;
             measureVBAT();
             
             #if enChargingRtc
@@ -127,12 +128,20 @@ int main(void)
             }
             #endif
 
+check_button_again:
             if(!DEV_Digital_Read(BAT_STATE)) {  // KEY pressed
+		count++;
                 printf("key interrupt\r\n");
-		horizontal = !horizontal;
-		sdScanDir(horizontal);
-                run_display(Time, alarmTime, isCard);
+		if(count == 2) {
+			sdScanDir(horizontal);
+			horizontal = !horizontal;
+			run_display(Time, alarmTime, isCard);
+		} else {
+		    goto check_button_again;
+		}
             }
+	    if(count == 1)
+		run_display(Time, alarmTime, isCard);
             DEV_Delay_ms(200);
         }
     }
