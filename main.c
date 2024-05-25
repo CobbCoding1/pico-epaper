@@ -57,6 +57,39 @@ void run_display(Time_data Time, Time_data alarmTime, char hasCard)
     rtcRunAlarm(Time, alarmTime);  // RTC run alarm
 }
 
+int detect_double_press(UWORD pin, UWORD debounce_time, UWORD timeout) {
+    static UWORD last_press_time = 0;
+    static UWORD press_count = 0;
+
+    UWORD current_time = to_ms_since_boot(get_absolute_time());
+
+    if (DEV_Digital_Read(pin) == 0) {  // Button is pressed
+        if (current_time - last_press_time > debounce_time) {
+            press_count++;
+            last_press_time = current_time;
+        }
+    }
+
+    if (press_count == 2) {
+        if (current_time - last_press_time <= timeout) {
+            press_count = 0;  // Reset press count after detecting double press
+            return 2;  // Double press detected
+        } else {
+            press_count = 1;  // Consider the current press as the first press of the next sequence
+        }
+    }
+
+    if (current_time - last_press_time > timeout) {
+	if(press_count == 1) {
+		press_count = 0;
+		return 1;
+	}
+	press_count = 0;
+    }
+
+    return 0;  // No double press detected
+}
+
 int main(void)
 {
     Time_data Time = {2024-2000, 3, 31, 0, 0, 0};
@@ -65,6 +98,9 @@ int main(void)
     // alarmTime.minutes += 30;
     alarmTime.hours += 1;
     char isCard = 0;
+
+    UWORD debounce_time = 50;
+    UWORD double_press_timeout = 500;
   
     printf("Init...\r\n");
     if(DEV_Module_Init() != 0) {  // DEV init
@@ -113,6 +149,8 @@ int main(void)
     }
 
     if(!DEV_Digital_Read(VBUS)) {    // no charge state
+	horizontal = !horizontal;
+	sdScanDir(horizontal);
         run_display(Time, alarmTime, isCard);
     }
     else {  // charge state
@@ -127,12 +165,21 @@ int main(void)
             }
 
 check_button_again:
+	    if (detect_double_press(BAT_STATE, debounce_time, double_press_timeout) == 2) {
+		horizontal = !horizontal;
+		sdScanDir(horizontal);
+		run_display(Time, alarmTime, isCard);
+	    } else if(detect_double_press(BAT_STATE, debounce_time, double_press_timeout) == 1) {
+		run_display(Time, alarmTime, isCard);
+	    }
+
+/*
             if(!DEV_Digital_Read(BAT_STATE)) {  // KEY pressed
 		count++;
                 printf("key interrupt\r\n");
 		if(count == 2) {
-			sdScanDir(horizontal);
 			horizontal = !horizontal;
+			sdScanDir(horizontal);
 			run_display(Time, alarmTime, isCard);
 		} else {
 		    DEV_Delay_ms(500);
@@ -141,6 +188,7 @@ check_button_again:
             }
 	    if(count == 1)
 		run_display(Time, alarmTime, isCard);
+*/
             DEV_Delay_ms(200);
         }
     }
