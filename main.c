@@ -54,6 +54,8 @@ void run_display(Time_data Time, Time_data alarmTime, char hasCard)
     }
 
     PCF85063_clear_alarm_flag();    // clear RTC alarm flag
+    if(alarmTime.hours == 10) alarmTime.hours = 14;
+    else alarmTime.hours = 10;
     rtcRunAlarm(Time, alarmTime);  // RTC run alarm
 }
 
@@ -63,7 +65,7 @@ int main(void)
     Time_data alarmTime = Time;
     // alarmTime.seconds += 10;
     // alarmTime.minutes += 30;
-    alarmTime.hours +=24;
+    alarmTime.hours += 10;
     char isCard = 0;
   
     printf("Init...\r\n");
@@ -121,12 +123,10 @@ int main(void)
 	    int count = 0;
             measureVBAT();
             
-            #if enChargingRtc
             if(!DEV_Digital_Read(RTC_INT)) {    // RTC interrupt trigger
                 printf("rtc interrupt\r\n");
                 run_display(Time, alarmTime, isCard);
             }
-            #endif
 
 check_button_again:
             if(!DEV_Digital_Read(BAT_STATE)) {  // KEY pressed
@@ -137,6 +137,7 @@ check_button_again:
 			horizontal = !horizontal;
 			run_display(Time, alarmTime, isCard);
 		} else {
+		    DEV_DELAY_MS(500);
 		    goto check_button_again;
 		}
             }
