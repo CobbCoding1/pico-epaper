@@ -321,7 +321,7 @@ void sdScanDir(int horizontal)
 	    ls2file("0:/vertical", fileList, horizontal);
     printf("ls %s\r\n", fileList);
     run_cat(fileList);
-    file_shuffle();
+    //file_shuffle();
 
     run_unmount();
 }

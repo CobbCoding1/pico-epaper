@@ -21,5 +21,6 @@ void setFilePath(void);
 
 void updatePathIndex(void);
 void file_sort();
+void file_shuffle();
 
 #endif
