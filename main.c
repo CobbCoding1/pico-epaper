@@ -43,9 +43,45 @@ void chargeState_callback()
     }
 }
 
-void run_display(Time_data Time, Time_data alarmTime, char hasCard)
+int presses = 0;
+
+void run_display(Time_data Time, Time_data alarmTime, char hasCard, int isRtc)
 {
     if(hasCard) {
+	if(!isRtc) {
+	    /*
+	    static int presses = 0;
+	    static UWORD prev_time = 0;
+      	    UWORD current_time = to_ms_since_boot(get_absolute_time());
+	    if(prev_time > 0 && current_time - prev_time < 500) {
+		    prev_time = current_time;
+		    presses += 1;
+		    if(presses == 2) {
+			presses = 0;
+			horizontal = !horizontal;
+			sdScanDir(horizontal);
+		    } 
+	    } else {
+		presses = 0;
+	    }
+	    */
+	    presses++;
+	    static UWORD prev_time = 0;
+      	    UWORD current_time = to_ms_since_boot(get_absolute_time());
+
+	    if(prev_time > 0 && current_time - prev_time >= 500) {
+		presses = 0;
+	    } else {
+		prev_time = current_time;
+	    }
+
+   	    if(presses == 2) {
+		presses = 0;
+		horizontal = !horizontal;
+		sdScanDir(horizontal);
+	    }
+		
+	}
         setFilePath();
         EPD_7in3f_display_BMP(pathName, measureVBAT());   // display bmp
     }
@@ -151,7 +187,7 @@ int main(void)
     if(!DEV_Digital_Read(VBUS)) {    // no charge state
 	horizontal = !horizontal;
 	sdScanDir(horizontal);
-        run_display(Time, alarmTime, isCard);
+        run_display(Time, alarmTime, isCard, 0);
     }
     else {  // charge state
         chargeState_callback();
@@ -161,16 +197,23 @@ int main(void)
             
             if(!DEV_Digital_Read(RTC_INT)) {    // RTC interrupt trigger
                 printf("rtc interrupt\r\n");
-                run_display(Time, alarmTime, isCard);
+                run_display(Time, alarmTime, isCard, 1);
             }
 
+/*
 check_button_again:
 	    if (detect_double_press(BAT_STATE, debounce_time, double_press_timeout) == 2) {
 		horizontal = !horizontal;
 		sdScanDir(horizontal);
-		run_display(Time, alarmTime, isCard);
+		run_display(Time, alarmTime, isCard, 0);
 	    } else if(detect_double_press(BAT_STATE, debounce_time, double_press_timeout) == 1) {
-		run_display(Time, alarmTime, isCard);
+		run_display(Time, alarmTime, isCard, 0);
+	    }
+*/
+
+            if(!DEV_Digital_Read(BAT_STATE)) {  // KEY pressed
+                printf("key interrupt\r\n");
+		run_display(Time, alarmTime, isCard, 0);
 	    }
 
 /*
@@ -180,14 +223,14 @@ check_button_again:
 		if(count == 2) {
 			horizontal = !horizontal;
 			sdScanDir(horizontal);
-			run_display(Time, alarmTime, isCard);
+			run_display(Time, alarmTime, isCard, 0);
 		} else {
 		    DEV_Delay_ms(500);
 		    goto check_button_again;
 		}
             }
 	    if(count == 1)
-		run_display(Time, alarmTime, isCard);
+		run_display(Time, alarmTime, isCard, 0);
 */
             DEV_Delay_ms(200);
         }
