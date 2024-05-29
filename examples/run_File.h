@@ -17,7 +17,7 @@ void file_cat(void);
 void sdScanDir(int horizontal);
 
 char isFileExist(const char *path);
-void setFilePath(int isRTC);
+void setFilePath(void);
 
 void updatePathIndex(void);
 void file_sort();

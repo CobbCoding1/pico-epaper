@@ -46,24 +46,7 @@ void chargeState_callback()
 void run_display(Time_data Time, Time_data alarmTime, char hasCard, int isRtc)
 {
     if(hasCard) {
-	if(!isRtc) {
-	    static int presses = 0;
-	    static UWORD prev_time = 0;
-      	    UWORD current_time = to_ms_since_boot(get_absolute_time());
-	    if(current_time - prev_time < 500) {
-		    prev_time = current_time;
-		    presses += 1;
-		    if(presses == 2) {
-			presses = 0;
-			horizontal = !horizontal;
-			sdScanDir(horizontal);
-		    } 
-	    } else {
-		prev_time = current_time;
-		presses = 1;
-	    }
-	}
-        setFilePath(isRtc);
+        setFilePath();
         EPD_7in3f_display_BMP(pathName, measureVBAT());   // display bmp
     }
     else {
@@ -194,6 +177,15 @@ check_button_again:
 
             if(!DEV_Digital_Read(BAT_STATE)) {  // KEY pressed
                 printf("key interrupt\r\n");
+		run_display(Time, alarmTime, isCard, 0);
+	    }
+
+
+            if(!DEV_Digital_Read(30)) {  // RUN KEY pressed
+                printf("key interrupt\r\n");
+		horizontal = !horizontal;
+		sdScanDir(horizontal);
+		file_sort();
 		run_display(Time, alarmTime, isCard, 0);
 	    }
 
