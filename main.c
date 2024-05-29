@@ -43,17 +43,14 @@ void chargeState_callback()
     }
 }
 
-int presses = 0;
-
 void run_display(Time_data Time, Time_data alarmTime, char hasCard, int isRtc)
 {
     if(hasCard) {
 	if(!isRtc) {
-	    /*
 	    static int presses = 0;
 	    static UWORD prev_time = 0;
       	    UWORD current_time = to_ms_since_boot(get_absolute_time());
-	    if(prev_time > 0 && current_time - prev_time < 500) {
+	    if(current_time - prev_time < 500) {
 		    prev_time = current_time;
 		    presses += 1;
 		    if(presses == 2) {
@@ -62,27 +59,11 @@ void run_display(Time_data Time, Time_data alarmTime, char hasCard, int isRtc)
 			sdScanDir(horizontal);
 		    } 
 	    } else {
-		presses = 0;
-	    }
-	    */
-	    presses++;
-	    static UWORD prev_time = 0;
-      	    UWORD current_time = to_ms_since_boot(get_absolute_time());
-
-	    if(prev_time > 0 && current_time - prev_time >= 500) {
-		presses = 0;
-	    } else {
 		prev_time = current_time;
+		presses = 1;
 	    }
-
-   	    if(presses == 2) {
-		presses = 0;
-		horizontal = !horizontal;
-		sdScanDir(horizontal);
-	    }
-		
 	}
-        setFilePath();
+        setFilePath(isRtc);
         EPD_7in3f_display_BMP(pathName, measureVBAT());   // display bmp
     }
     else {

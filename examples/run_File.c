@@ -321,7 +321,7 @@ void sdScanDir(int horizontal)
 	    ls2file("0:/vertical", fileList, horizontal);
     printf("ls %s\r\n", fileList);
     run_cat(fileList);
-    //file_shuffle();
+    file_shuffle();
 
     run_unmount();
 }
@@ -434,9 +434,27 @@ static int getPathIndex(void)
     parameter: 
         none
 */
-void setFilePath(void)
+void setFilePath(int isRTC)
 {
     int index = 1;
+    static int horizontal = 0;
+    static int clicks = 0;
+    static UWORD prev_time = 0;
+    if(!isRTC) {
+	UWORD cur_time = to_ms_since_boot(get_absolute_time());
+	if(cur_time - prev_time <= 1000) {
+	    clicks++;
+	    prev_time = cur_time;
+   	    if(clicks == 2) {
+		clicks = 0;
+		horizontal = !horizontal;
+		sdScanDir(horizontal);
+	    }
+	} else {
+	    clicks = 1;
+	    prev_time = cur_time;
+	}
+    }
 
     // TODO: update it to randomly choose an index, rather than going in order
     if(isFileExist("index.txt")) {
