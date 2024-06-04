@@ -123,6 +123,10 @@ void DEV_GPIO_Init(void)
 	DEV_GPIO_Mode(BAT_OFF, 1);
 	DEV_GPIO_Mode(BAT_STATE, 0);
 	gpio_pull_up(BAT_STATE);
+
+	DEV_GPIO_Mode(RUN, 0);
+	gpio_pull_up(RUN);
+
 	DEV_GPIO_Mode(CHARGE_STATE, 0);
 	gpio_pull_up(CHARGE_STATE);
 	// POWER

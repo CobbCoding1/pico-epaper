@@ -149,9 +149,38 @@ int main(void)
     }
 
     if(!DEV_Digital_Read(VBUS)) {    // no charge state
-	horizontal = !horizontal;
-	sdScanDir(horizontal);
-        run_display(Time, alarmTime, isCard, 0);
+
+	while(true) {
+		if(DEV_Digital_Read(VBUS)) break;
+
+		if(measureVBAT() < 3.1) {   // battery power is low
+			printf("low power ...\r\n");
+			PCF85063_alarm_Time_Disable();
+			ledLowPower();  // LED flash for Low power
+			powerOff(); // BAT off
+			return 0;
+		}
+
+		measureVBAT();
+		if(!DEV_Digital_Read(BAT_STATE)) { 
+			printf("key interrupt\r\n");
+			run_display(Time, alarmTime, isCard, 0);
+		}
+
+		if(!DEV_Digital_Read(RUN)) {  // RUN KEY pressed
+			printf("key interrupt\r\n");
+			horizontal = !horizontal;
+			sdScanDir(horizontal);
+			run_display(Time, alarmTime, isCard, 0);
+		}
+
+		if(!DEV_Digital_Read(RTC_INT)) {    // RTC interrupt trigger
+			printf("rtc interrupt\r\n");
+			run_display(Time, alarmTime, isCard, 1);
+		}
+
+	    DEV_Delay_ms(200);
+	}
     }
     else {  // charge state
         chargeState_callback();
@@ -164,47 +193,19 @@ int main(void)
                 run_display(Time, alarmTime, isCard, 1);
             }
 
-/*
-check_button_again:
-	    if (detect_double_press(BAT_STATE, debounce_time, double_press_timeout) == 2) {
+
+	    if(!DEV_Digital_Read(RUN)) {  // RUN KEY pressed
+		printf("key interrupt\r\n");
 		horizontal = !horizontal;
 		sdScanDir(horizontal);
 		run_display(Time, alarmTime, isCard, 0);
-	    } else if(detect_double_press(BAT_STATE, debounce_time, double_press_timeout) == 1) {
-		run_display(Time, alarmTime, isCard, 0);
 	    }
-*/
 
             if(!DEV_Digital_Read(BAT_STATE)) {  // KEY pressed
                 printf("key interrupt\r\n");
 		run_display(Time, alarmTime, isCard, 0);
 	    }
 
-
-            if(!DEV_Digital_Read(30)) {  // RUN KEY pressed
-                printf("key interrupt\r\n");
-		horizontal = !horizontal;
-		sdScanDir(horizontal);
-		file_sort();
-		run_display(Time, alarmTime, isCard, 0);
-	    }
-
-/*
-            if(!DEV_Digital_Read(BAT_STATE)) {  // KEY pressed
-		count++;
-                printf("key interrupt\r\n");
-		if(count == 2) {
-			horizontal = !horizontal;
-			sdScanDir(horizontal);
-			run_display(Time, alarmTime, isCard, 0);
-		} else {
-		    DEV_Delay_ms(500);
-		    goto check_button_again;
-		}
-            }
-	    if(count == 1)
-		run_display(Time, alarmTime, isCard, 0);
-*/
             DEV_Delay_ms(200);
         }
     }
