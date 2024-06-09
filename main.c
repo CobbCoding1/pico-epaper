@@ -43,7 +43,7 @@ void chargeState_callback()
     }
 }
 
-void run_display(Time_data Time, Time_data alarmTime, char hasCard, int isRtc)
+void run_display(Time_data Time, Time_data alarmTime, char hasCard)
 {
     if(hasCard) {
         setFilePath();
@@ -55,39 +55,6 @@ void run_display(Time_data Time, Time_data alarmTime, char hasCard, int isRtc)
 
     PCF85063_clear_alarm_flag();    // clear RTC alarm flag
     rtcRunAlarm(Time, alarmTime);  // RTC run alarm
-}
-
-int detect_double_press(UWORD pin, UWORD debounce_time, UWORD timeout) {
-    static UWORD last_press_time = 0;
-    static UWORD press_count = 0;
-
-    UWORD current_time = to_ms_since_boot(get_absolute_time());
-
-    if (DEV_Digital_Read(pin) == 0) {  // Button is pressed
-        if (current_time - last_press_time > debounce_time) {
-            press_count++;
-            last_press_time = current_time;
-        }
-    }
-
-    if (press_count == 2) {
-        if (current_time - last_press_time <= timeout) {
-            press_count = 0;  // Reset press count after detecting double press
-            return 2;  // Double press detected
-        } else {
-            press_count = 1;  // Consider the current press as the first press of the next sequence
-        }
-    }
-
-    if (current_time - last_press_time > timeout) {
-	if(press_count == 1) {
-		press_count = 0;
-		return 1;
-	}
-	press_count = 0;
-    }
-
-    return 0;  // No double press detected
 }
 
 int main(void)
@@ -125,7 +92,7 @@ int main(void)
         ledPowerOn();
     }
 
-    if(!sdTest()) 
+    if(!sdTest() && isCard == 0) 
     {
         isCard = 1;
         if(Mode == 0)
@@ -149,9 +116,9 @@ int main(void)
     }
 
     if(!DEV_Digital_Read(VBUS)) {    // no charge state
-
 	while(true) {
-		if(DEV_Digital_Read(VBUS)) break;
+	    DEV_Delay_ms(200);
+		measureVBAT();
 
 		if(measureVBAT() < 3.1) {   // battery power is low
 			printf("low power ...\r\n");
@@ -161,50 +128,44 @@ int main(void)
 			return 0;
 		}
 
-		measureVBAT();
-		if(!DEV_Digital_Read(BAT_STATE)) { 
-			printf("key interrupt\r\n");
-			run_display(Time, alarmTime, isCard, 0);
-		}
-
-		if(!DEV_Digital_Read(RUN)) {  // RUN KEY pressed
-			printf("key interrupt\r\n");
-			horizontal = !horizontal;
-			sdScanDir(horizontal);
-			run_display(Time, alarmTime, isCard, 0);
-		}
 
 		if(!DEV_Digital_Read(RTC_INT)) {    // RTC interrupt trigger
 			printf("rtc interrupt\r\n");
-			run_display(Time, alarmTime, isCard, 1);
+			run_display(Time, alarmTime, isCard);
+			continue;
 		}
 
-	    DEV_Delay_ms(200);
+		if(!DEV_Digital_Read(BAT_STATE)) { 
+			printf("key interrupt\r\n");
+			DEV_Delay_ms(800);
+			if(!DEV_Digital_Read(BAT_STATE)) { 
+				sdScanDir(!horizontal);
+				horizontal = !horizontal;
+			}
+			run_display(Time, alarmTime, isCard);
+			continue;
+		}
 	}
     }
     else {  // charge state
         chargeState_callback();
         while(DEV_Digital_Read(VBUS)) {
-	    int count = 0;
             measureVBAT();
             
             if(!DEV_Digital_Read(RTC_INT)) {    // RTC interrupt trigger
                 printf("rtc interrupt\r\n");
-                run_display(Time, alarmTime, isCard, 1);
+                run_display(Time, alarmTime, isCard);
             }
-
-
-	    if(!DEV_Digital_Read(RUN)) {  // RUN KEY pressed
-		printf("key interrupt\r\n");
-		horizontal = !horizontal;
-		sdScanDir(horizontal);
-		run_display(Time, alarmTime, isCard, 0);
-	    }
-
-            if(!DEV_Digital_Read(BAT_STATE)) {  // KEY pressed
-                printf("key interrupt\r\n");
-		run_display(Time, alarmTime, isCard, 0);
-	    }
+  		if(!DEV_Digital_Read(BAT_STATE)) { 
+			printf("key interrupt\r\n");
+			DEV_Delay_ms(800);
+			if(!DEV_Digital_Read(BAT_STATE)) { 
+				horizontal = !horizontal;
+				sdScanDir(horizontal);
+			}
+			run_display(Time, alarmTime, isCard);
+			continue;
+		}
 
             DEV_Delay_ms(200);
         }
