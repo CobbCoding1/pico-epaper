@@ -20,6 +20,8 @@ Mode 2: pic folder name is not automatically obtained, users need to create file
 */
 #define Mode 1
 
+#define RTC_TIME_MS 300000
+
 
 float measureVBAT(void)
 {
@@ -61,13 +63,15 @@ int main(void)
 {
     Time_data Time = {2024-2000, 3, 31, 0, 0, 0};
     Time_data alarmTime = Time;
-    // alarmTime.seconds += 10;
-    // alarmTime.minutes += 30;
-    alarmTime.hours += 1;
+    //alarmTime.seconds += 10;
+    //alarmTime.minutes += 5;
+    alarmTime.hours += 100;
     char isCard = 0;
 
     UWORD debounce_time = 50;
     UWORD double_press_timeout = 500;
+
+    uint32_t initial_time = get_absolute_time();
   
     printf("Init...\r\n");
     if(DEV_Module_Init() != 0) {  // DEV init
@@ -115,6 +119,9 @@ int main(void)
         isCard = 0;
     }
 
+
+    uint32_t current_time = initial_time;
+
     if(!DEV_Digital_Read(VBUS)) {    // no charge state
 	while(true) {
 	    DEV_Delay_ms(200);
@@ -128,12 +135,21 @@ int main(void)
 			return 0;
 		}
 
+		current_time = get_absolute_time();
 
+		if(current_time - initial_time > (RTC_TIME_MS*1000)) {
+			initial_time = current_time;
+			run_display(Time, alarmTime, isCard);
+			continue;
+		}
+
+/*
 		if(!DEV_Digital_Read(RTC_INT)) {    // RTC interrupt trigger
 			printf("rtc interrupt\r\n");
 			run_display(Time, alarmTime, isCard);
 			continue;
 		}
+*/
 
 		if(!DEV_Digital_Read(BAT_STATE)) { 
 			printf("key interrupt\r\n");
@@ -151,11 +167,21 @@ int main(void)
         chargeState_callback();
         while(DEV_Digital_Read(VBUS)) {
             measureVBAT();
-            
+ /*           
             if(!DEV_Digital_Read(RTC_INT)) {    // RTC interrupt trigger
                 printf("rtc interrupt\r\n");
                 run_display(Time, alarmTime, isCard);
             }
+*/
+
+		current_time = get_absolute_time();
+
+		if((current_time - initial_time) >= (RTC_TIME_MS*1000)) {
+			initial_time = current_time;
+			run_display(Time, alarmTime, isCard);
+			continue;
+		}
+
   		if(!DEV_Digital_Read(BAT_STATE)) { 
 			printf("key interrupt\r\n");
 			DEV_Delay_ms(800);
